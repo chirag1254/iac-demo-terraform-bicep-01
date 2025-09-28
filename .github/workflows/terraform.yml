@@ -29,8 +29,12 @@ jobs:
       - name: Terraform Init
         run: terraform -chdir=iac-terraform/envs/dev init
       
+      - name: Terraform Format
+        run: terraform -chdir=iac-terraform/envs/dev fmt
+      
       - name: Terraform Format Check
         run: terraform -chdir=iac-terraform/envs/dev fmt -check
+
       
       - name: Terraform Validate
         run: terraform -chdir=iac-terraform/envs/dev validate
