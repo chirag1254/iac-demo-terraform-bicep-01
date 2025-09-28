@@ -27,17 +27,18 @@ jobs:
           terraform_version: 1.5.0
 
       - name: Terraform Init
-        run: terraform init
-
+        run: terraform -chdir=iac-terraform/envs/dev init
+      
       - name: Terraform Format Check
-        run: terraform fmt -check
-
+        run: terraform -chdir=iac-terraform/envs/dev fmt -check
+      
       - name: Terraform Validate
-        run: terraform validate
-
+        run: terraform -chdir=iac-terraform/envs/dev validate
+      
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
+        run: terraform -chdir=iac-terraform/envs/dev plan -out=tfplan
+      
       - name: Terraform Apply (manual approval)
         if: github.event_name == 'workflow_dispatch'
-        run: terraform apply -auto-approve tfplan
+        run: terraform -chdir=iac-terraform/envs/dev apply -auto-approve tfplan
+
