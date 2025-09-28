@@ -5,26 +5,34 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   bicep-deploy:
     runs-on: ubuntu-latest
+    env:
+      BICEP_FILE: iac-bicep/envs/dev/main.bicep
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Azure CLI
-        uses: azure/setup-azure@v3
-
-      - name: Login to Azure
-        run: az login --service-principal -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }} --tenant ${{ secrets.ARM_TENANT_ID }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.ARM_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.ARM_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.ARM_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.ARM-TENANT_ID }}"
+            }
 
       - name: Bicep Lint
-        run: az bicep build --file iac-bicep/envs/dev/main.bicep
-      
-      - name: Bicep What-If (Preview)
-        run: az deployment group what-if --resource-group iac-modular-rg --template-file iac-bicep/envs/dev/main.bicep
-      
-      - name: Bicep Deploy (manual approval)
-        run: az deployment group create --resource-group iac-modular-rg --template-file iac-bicep/envs/dev/main.bicep
+        run: az bicep build --file $BICEP_FILE
 
+      - name: Bicep What-If (Preview)
+        run: az deployment group what-if --resource-group iac-modular-rg --template-file $BICEP_FILE
+
+      - name: Bicep Deploy (manual approval)
+        if: github.event_name == 'workflow_dispatch'
+        run: az deployment group create --resource-group iac-modular-rg --template-file $BICEP_FILE
