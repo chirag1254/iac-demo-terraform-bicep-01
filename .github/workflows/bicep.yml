@@ -1,0 +1,30 @@
+name: Bicep CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  bicep-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Azure CLI
+        uses: azure/setup-azure@v3
+
+      - name: Login to Azure
+        run: az login --service-principal -u ${{ secrets.ARM_CLIENT_ID }} -p ${{ secrets.ARM_CLIENT_SECRET }} --tenant ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Bicep Lint
+        run: az bicep build --file iac-bicep/envs/dev/main.bicep
+      
+      - name: Bicep What-If (Preview)
+        run: az deployment group what-if --resource-group iac-modular-rg --template-file iac-bicep/envs/dev/main.bicep
+      
+      - name: Bicep Deploy (manual approval)
+        run: az deployment group create --resource-group iac-modular-rg --template-file iac-bicep/envs/dev/main.bicep
+
