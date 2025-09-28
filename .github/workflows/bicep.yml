@@ -31,8 +31,7 @@ jobs:
         run: az bicep build --file $BICEP_FILE
 
       - name: Bicep What-If (Preview)
-        run: az deployment group what-if --resource-group iac-modular-rg --template-file $BICEP_FILE
+        run: az deployment sub what-if --location eastus --template-file $BICEP_FILE
 
       - name: Bicep Deploy (manual approval)
-        if: github.event_name == 'workflow_dispatch'
-        run: az deployment group create --resource-group iac-modular-rg --template-file $BICEP_FILE
+        run: az deployment sub create --location eastus --template-file $BICEP_FILE
